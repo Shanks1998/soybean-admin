@@ -74,5 +74,55 @@ export const generatedRoutes: GeneratedRoute[] = [
       constant: true,
       hideInMenu: true
     }
+  },
+  {
+    name: 'management',
+    path: '/management',
+    component: 'layout.base',
+    meta: {
+      title: '系统管理'
+    },
+    children: [
+      {
+        name: 'management_harvest',
+        path: '/management/harvest',
+        component: 'view.management_harvest',
+        meta: {
+          title: '收获管理'
+        }
+      },
+      {
+        name: 'management_order',
+        path: '/management/order',
+        component: 'view.management_order',
+        meta: {
+          title: '订单管理'
+        }
+      },
+      {
+        name: 'management_seed',
+        path: '/management/seed',
+        component: 'view.management_seed',
+        meta: {
+          title: '种子管理'
+        }
+      },
+      {
+        name: 'management_task',
+        path: '/management/task',
+        component: 'view.management_task',
+        meta: {
+          title: '任务管理'
+        }
+      },
+      {
+        name: 'management_user',
+        path: '/management/user',
+        component: 'view.management_user',
+        meta: {
+          title: '用户管理'
+        }
+      }
+    ]
   }
 ];

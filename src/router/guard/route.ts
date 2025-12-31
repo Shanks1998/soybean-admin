@@ -8,7 +8,6 @@ import type {
 import type { RouteKey, RoutePath } from '@elegant-router/types';
 import { useAuthStore } from '@/store/modules/auth';
 import { useRouteStore } from '@/store/modules/route';
-import { localStg } from '@/utils/storage';
 import { getRouteName } from '@/router/elegant/transform';
 
 /**
@@ -31,12 +30,20 @@ export function createRouteGuard(router: Router) {
     const loginRoute: RouteKey = 'login';
     const noAuthorizationRoute: RouteKey = '403';
 
-    const isLogin = Boolean(localStg.get('token'));
+    // Check login status (using cookie session)
+    // If not logged in, try to init admin info (check content of cookie)
+    if (!authStore.isLogin && to.name !== loginRoute) {
+      await authStore.initAdminInfo();
+    }
+
+    const isLogin = authStore.isLogin;
     const needLogin = !to.meta.constant;
     const routeRoles = to.meta.roles || [];
 
-    const hasRole = authStore.userInfo.roles.some(role => routeRoles.includes(role));
-    const hasAuth = authStore.isStaticSuper || !routeRoles.length || hasRole;
+    // Check permissions
+    // AdminAuth store has single role string, routeRoles is array
+    const hasRole = routeRoles.includes(authStore.role);
+    const hasAuth = authStore.isSuperAdmin || !routeRoles.length || hasRole;
 
     // if it is login route when logged in, then switch to the root page
     if (to.name === loginRoute && isLogin) {
@@ -95,7 +102,8 @@ async function initRoute(to: RouteLocationNormalized): Promise<RouteLocationRaw 
     return location;
   }
 
-  const isLogin = Boolean(localStg.get('token'));
+  const authStore = useAuthStore();
+  const isLogin = authStore.isLogin;
 
   if (!isLogin) {
     // if the user is not logged in and the route is a constant route but not the "not-found" route, then it is allowed to access.

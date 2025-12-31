@@ -1,0 +1,2531 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "挖挖农场管理端 API，用于用户管理、内容审核等",
+    "title": "管理端 API",
+    "contact": {},
+    "version": "1.0"
+  },
+  "basePath": "/admin/api",
+  "paths": {
+    "/harvest": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "分页获取所有收获记录（管理端）",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-harvest"],
+        "summary": "获取收获记录列表",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "description": "页码",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "default": 10,
+            "description": "每页数量",
+            "name": "size",
+            "in": "query"
+          },
+          {
+            "enum": ["unredeemed", "pending", "shipped", "completed", "cancelled"],
+            "type": "string",
+            "description": "状态筛选",
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/admin.HarvestRecordListResponse"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/harvest/{id}": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "根据ID获取收获记录详情（管理端）",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-harvest"],
+        "summary": "获取收获记录详情",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "记录ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/admin.HarvestRecordAdminResponse"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "记录不存在",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/harvest/{id}/status": {
+      "put": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "更新收获记录的状态",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-harvest"],
+        "summary": "更新收获记录状态",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "记录ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "状态信息",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin.UpdateHarvestStatusRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "更新成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/admin.HarvestRecordAdminResponse"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "记录不存在",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/harvest/{id}/tracking-no": {
+      "put": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "更新收获记录的快递单号并标记为已发货",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-harvest"],
+        "summary": "更新快递单号",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "记录ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "快递单号",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin.UpdateTrackingNoRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "更新成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/admin.HarvestRecordAdminResponse"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "记录不存在",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "description": "使用用户名和密码登录，通过 Session 维持登录状态",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin"],
+        "summary": "管理员登录",
+        "parameters": [
+          {
+            "description": "登录信息",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin.LoginRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "登录成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/admin.LoginResponse"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "用户名或密码错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "账号已被禁用",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "清除登录状态（清除 Session）",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin"],
+        "summary": "管理员登出",
+        "responses": {
+          "200": {
+            "description": "登出成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "/orders/repair/cancel": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "手动触发订单取消（退款）的处理逻辑，用于补单场景",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-order"],
+        "summary": "补单取消",
+        "parameters": [
+          {
+            "description": "订单号",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin.RepairOrderCancelRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "处理成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/orders/repair/pay": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "手动触发订单支付成功的处理逻辑，用于补单场景",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-order"],
+        "summary": "补单支付",
+        "parameters": [
+          {
+            "description": "订单号",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin.RepairOrderPayRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "处理成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/profile": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "获取当前登录管理员的详细信息",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin"],
+        "summary": "获取管理员信息",
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/models.Admin"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/seeds": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "分页获取种子列表，按排序顺序返回",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-seed"],
+        "summary": "获取种子列表",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "description": "页码",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "default": 10,
+            "description": "每页数量",
+            "name": "page_size",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/admin.SeedListResponse"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "创建新的种子配置",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-seed"],
+        "summary": "创建种子",
+        "parameters": [
+          {
+            "description": "种子信息",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin.CreateSeedRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "创建成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/models.SeedConfig"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/seeds/{id}": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "根据种子 ID 获取详细信息",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-seed"],
+        "summary": "获取种子详情",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "种子 ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/models.SeedConfig"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "种子不存在",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "更新种子配置信息（支持部分更新）",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-seed"],
+        "summary": "更新种子",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "种子 ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "种子信息（所有字段可选）",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin.UpdateSeedRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "更新成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {}
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "种子不存在",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "物理删除种子（谨慎使用，建议使用状态更新代替）",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-seed"],
+        "summary": "删除种子",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "种子 ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "删除成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {}
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "种子不存在",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/seeds/{id}/status": {
+      "put": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "启用或禁用种子",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-seed"],
+        "summary": "更新种子状态",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "种子 ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "状态信息",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin.UpdateSeedStatusRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "更新成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {}
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "种子不存在",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/tasks": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "分页获取任务配置列表，按排序顺序返回",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-task"],
+        "summary": "获取任务配置列表",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "description": "页码",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "default": 10,
+            "description": "每页数量",
+            "name": "page_size",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/admin.TaskListResponse"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "创建新的任务配置",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-task"],
+        "summary": "创建任务配置",
+        "parameters": [
+          {
+            "description": "任务配置信息",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin.CreateTaskRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "创建成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/models.TaskConfig"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{id}": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "根据任务配置 ID 获取详细信息",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-task"],
+        "summary": "获取任务配置详情",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "任务配置 ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/models.TaskConfig"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "任务配置不存在",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "更新任务配置信息（支持部分更新）",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-task"],
+        "summary": "更新任务配置",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "任务配置 ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "任务配置信息（所有字段可选）",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin.UpdateTaskRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "更新成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {}
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "任务配置不存在",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "物理删除任务配置（谨慎使用，建议使用状态更新代替）",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-task"],
+        "summary": "删除任务配置",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "任务配置 ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "删除成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {}
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "任务配置不存在",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "分页获取用户列表",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-user"],
+        "summary": "获取用户列表",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "description": "页码",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "default": 10,
+            "description": "每页数量",
+            "name": "page_size",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/admin.UserListResponse"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "根据用户 ID 获取详细信息",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-user"],
+        "summary": "获取用户详情",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "用户 ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/admin.GetUserResponse"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "用户不存在",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "删除用户及其所有相关数据（包括数据库和缓存）",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-user"],
+        "summary": "删除用户",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "用户 ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "删除成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {}
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "用户不存在",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/fertilizer/adjust": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "增加或减少用户的肥料数量（正数增加，负数减少）",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-user"],
+        "summary": "调整用户肥料数量",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "用户 ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "调整信息",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin.AdjustUserFertilizerRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "调整成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {}
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "用户不存在",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/max-daily-fertilize-count": {
+      "put": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "更新用户的每天最大施肥次数",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-user"],
+        "summary": "更新每天最大施肥次数",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "用户 ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "最大施肥次数",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin.UpdateMaxDailyFertilizeCountRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "更新成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {}
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "用户不存在",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/status": {
+      "put": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "启用或禁用用户",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["admin-user"],
+        "summary": "更新用户状态",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "用户 ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "状态信息",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin.UpdateUserStatusRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "更新成功",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/response.Response"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {}
+                  }
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "参数错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "schema": {
+              "$ref": "#/definitions/response.ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "admin.AdjustUserFertilizerRequest": {
+      "type": "object",
+      "required": ["amount", "reason"],
+      "properties": {
+        "amount": {
+          "description": "调整数量（正数增加，负数减少）",
+          "type": "integer",
+          "example": 100
+        },
+        "reason": {
+          "description": "调整原因",
+          "type": "string",
+          "example": "活动奖励"
+        }
+      }
+    },
+    "admin.CreateSeedRequest": {
+      "type": "object",
+      "required": ["icon_url", "name"],
+      "properties": {
+        "coupon_id": {
+          "description": "优惠券ID（优惠券类型时使用）",
+          "type": "string",
+          "example": "coupon_456"
+        },
+        "icon_url": {
+          "description": "种子图标URL",
+          "type": "string",
+          "example": "https://example.com/seed.png"
+        },
+        "name": {
+          "description": "种子名称",
+          "type": "string",
+          "maxLength": 64,
+          "example": "突尼斯石榴"
+        },
+        "shop_sku_id": {
+          "description": "微信小店SKU ID（商品类型时使用）",
+          "type": "string",
+          "example": "sku_123"
+        },
+        "sort_order": {
+          "description": "排序顺序",
+          "type": "integer",
+          "example": 0
+        },
+        "status": {
+          "description": "状态：0启用 1禁用",
+          "type": "integer",
+          "enum": [0, 1],
+          "example": 0
+        }
+      }
+    },
+    "admin.CreateTaskRequest": {
+      "type": "object",
+      "required": ["max_count", "reward", "task_name", "task_type"],
+      "properties": {
+        "description": {
+          "description": "任务描述",
+          "type": "string",
+          "maxLength": 255,
+          "example": "浏览商品获得肥料"
+        },
+        "is_enabled": {
+          "description": "是否启用",
+          "type": "boolean",
+          "example": true
+        },
+        "is_one_time": {
+          "description": "是否为一次性任务",
+          "type": "boolean",
+          "example": false
+        },
+        "max_count": {
+          "description": "每日最大完成次数",
+          "type": "integer",
+          "example": 5
+        },
+        "need_claim": {
+          "description": "是否需要主动领取奖励",
+          "type": "boolean",
+          "example": false
+        },
+        "reward": {
+          "description": "单次奖励（肥料数量）",
+          "type": "integer",
+          "example": 100
+        },
+        "sort_order": {
+          "description": "排序",
+          "type": "integer",
+          "example": 0
+        },
+        "task_name": {
+          "description": "任务名称",
+          "type": "string",
+          "maxLength": 64,
+          "example": "浏览商品"
+        },
+        "task_type": {
+          "description": "任务类型",
+          "type": "string",
+          "maxLength": 32,
+          "example": "browse_product"
+        }
+      }
+    },
+    "admin.GetUserResponse": {
+      "type": "object",
+      "properties": {
+        "game_state": {
+          "description": "游戏状态信息",
+          "allOf": [
+            {
+              "$ref": "#/definitions/admin.UserGameStateInfo"
+            }
+          ]
+        },
+        "identities": {
+          "description": "第三方登录信息",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/admin.UserIdentityInfo"
+          }
+        },
+        "user": {
+          "description": "用户基本信息",
+          "allOf": [
+            {
+              "$ref": "#/definitions/models.User"
+            }
+          ]
+        }
+      }
+    },
+    "admin.HarvestRecordAdminResponse": {
+      "type": "object",
+      "properties": {
+        "address_data": {
+          "description": "收货地址数据",
+          "allOf": [
+            {
+              "$ref": "#/definitions/models.AddressSnapshot"
+            }
+          ]
+        },
+        "completed_at": {
+          "description": "完成时间",
+          "type": "string",
+          "example": "2024-01-01T00:00:00Z"
+        },
+        "created_at": {
+          "description": "创建时间",
+          "type": "string",
+          "example": "2024-01-01T00:00:00Z"
+        },
+        "id": {
+          "description": "记录ID",
+          "type": "integer",
+          "example": 1
+        },
+        "redeemed_at": {
+          "description": "兑换时间",
+          "type": "string",
+          "example": "2024-01-01T00:00:00Z"
+        },
+        "round_id": {
+          "description": "轮次ID",
+          "type": "integer",
+          "example": 1
+        },
+        "seed_data": {
+          "description": "种子数据",
+          "allOf": [
+            {
+              "$ref": "#/definitions/models.SeedSnapshot"
+            }
+          ]
+        },
+        "seed_id": {
+          "description": "种子ID",
+          "type": "integer",
+          "example": 1
+        },
+        "shipped_at": {
+          "description": "发货时间",
+          "type": "string",
+          "example": "2024-01-01T00:00:00Z"
+        },
+        "status": {
+          "description": "状态",
+          "type": "string",
+          "example": "unredeemed"
+        },
+        "tracking_no": {
+          "description": "快递单号",
+          "type": "string",
+          "example": "SF1234567890"
+        },
+        "tree_id": {
+          "description": "果树ID",
+          "type": "integer",
+          "example": 1
+        },
+        "updated_at": {
+          "description": "更新时间",
+          "type": "string",
+          "example": "2024-01-01T00:00:00Z"
+        },
+        "user_id": {
+          "description": "用户ID",
+          "type": "integer",
+          "example": 1
+        }
+      }
+    },
+    "admin.HarvestRecordListResponse": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "description": "当前页",
+          "type": "integer"
+        },
+        "records": {
+          "description": "记录列表",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/admin.HarvestRecordAdminResponse"
+          }
+        },
+        "size": {
+          "description": "每页数量",
+          "type": "integer"
+        },
+        "total": {
+          "description": "总数",
+          "type": "integer"
+        }
+      }
+    },
+    "admin.LoginRequest": {
+      "type": "object",
+      "required": ["password", "username"],
+      "properties": {
+        "password": {
+          "description": "密码",
+          "type": "string",
+          "example": "password123"
+        },
+        "username": {
+          "description": "管理员账号",
+          "type": "string",
+          "example": "admin"
+        }
+      }
+    },
+    "admin.LoginResponse": {
+      "type": "object",
+      "properties": {
+        "admin_id": {
+          "description": "管理员 ID",
+          "type": "integer",
+          "example": 1
+        },
+        "role": {
+          "description": "角色",
+          "type": "string",
+          "example": "admin"
+        },
+        "username": {
+          "description": "管理员账号",
+          "type": "string",
+          "example": "admin"
+        }
+      }
+    },
+    "admin.RepairOrderCancelRequest": {
+      "type": "object",
+      "required": ["order_id"],
+      "properties": {
+        "order_id": {
+          "description": "订单号",
+          "type": "string",
+          "example": "4200002489202512211234567890"
+        }
+      }
+    },
+    "admin.RepairOrderPayRequest": {
+      "type": "object",
+      "required": ["order_id"],
+      "properties": {
+        "order_id": {
+          "description": "订单号",
+          "type": "string",
+          "example": "4200002489202512211234567890"
+        }
+      }
+    },
+    "admin.SeedListResponse": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "description": "种子列表",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/models.SeedConfig"
+          }
+        },
+        "page": {
+          "description": "当前页",
+          "type": "integer",
+          "example": 1
+        },
+        "page_size": {
+          "description": "每页数量",
+          "type": "integer",
+          "example": 10
+        },
+        "total": {
+          "description": "总数",
+          "type": "integer",
+          "example": 100
+        }
+      }
+    },
+    "admin.TaskListResponse": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "description": "任务配置列表",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/models.TaskConfig"
+          }
+        },
+        "page": {
+          "description": "当前页",
+          "type": "integer",
+          "example": 1
+        },
+        "page_size": {
+          "description": "每页数量",
+          "type": "integer",
+          "example": 10
+        },
+        "total": {
+          "description": "总数",
+          "type": "integer",
+          "example": 100
+        }
+      }
+    },
+    "admin.UpdateHarvestStatusRequest": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "description": "状态",
+          "type": "string",
+          "enum": ["unredeemed", "pending", "shipped", "completed", "cancelled"],
+          "example": "shipped"
+        }
+      }
+    },
+    "admin.UpdateMaxDailyFertilizeCountRequest": {
+      "type": "object",
+      "required": ["max_daily_fertilize_count"],
+      "properties": {
+        "max_daily_fertilize_count": {
+          "description": "每天最大施肥次数",
+          "type": "integer",
+          "example": 200
+        }
+      }
+    },
+    "admin.UpdateSeedRequest": {
+      "type": "object",
+      "properties": {
+        "coupon_id": {
+          "description": "优惠券ID",
+          "type": "string",
+          "example": "coupon_456"
+        },
+        "icon_url": {
+          "description": "种子图标URL",
+          "type": "string",
+          "example": "https://example.com/seed.png"
+        },
+        "name": {
+          "description": "种子名称",
+          "type": "string",
+          "maxLength": 64,
+          "example": "突尼斯石榴"
+        },
+        "shop_sku_id": {
+          "description": "微信小店SKU ID",
+          "type": "string",
+          "example": "sku_123"
+        },
+        "sort_order": {
+          "description": "排序顺序",
+          "type": "integer",
+          "example": 0
+        }
+      }
+    },
+    "admin.UpdateSeedStatusRequest": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "description": "状态：0启用 1禁用",
+          "type": "integer",
+          "enum": [0, 1],
+          "example": 0
+        }
+      }
+    },
+    "admin.UpdateTaskRequest": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "description": "任务描述",
+          "type": "string",
+          "maxLength": 255,
+          "example": "浏览商品获得肥料"
+        },
+        "is_enabled": {
+          "description": "是否启用",
+          "type": "boolean",
+          "example": true
+        },
+        "is_one_time": {
+          "description": "是否为一次性任务",
+          "type": "boolean",
+          "example": false
+        },
+        "max_count": {
+          "description": "每日最大完成次数",
+          "type": "integer",
+          "example": 5
+        },
+        "need_claim": {
+          "description": "是否需要主动领取奖励",
+          "type": "boolean",
+          "example": false
+        },
+        "reward": {
+          "description": "单次奖励",
+          "type": "integer",
+          "example": 100
+        },
+        "sort_order": {
+          "description": "排序",
+          "type": "integer",
+          "example": 0
+        },
+        "task_name": {
+          "description": "任务名称",
+          "type": "string",
+          "maxLength": 64,
+          "example": "浏览商品"
+        }
+      }
+    },
+    "admin.UpdateTrackingNoRequest": {
+      "type": "object",
+      "required": ["tracking_no"],
+      "properties": {
+        "tracking_no": {
+          "description": "快递单号",
+          "type": "string",
+          "example": "SF1234567890"
+        }
+      }
+    },
+    "admin.UpdateUserStatusRequest": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "description": "状态：0正常 1禁用",
+          "type": "integer",
+          "enum": [0, 1],
+          "example": 0
+        }
+      }
+    },
+    "admin.UserGameStateInfo": {
+      "type": "object",
+      "properties": {
+        "can_harvest": {
+          "description": "是否可收获",
+          "type": "boolean",
+          "example": false
+        },
+        "current_round_id": {
+          "description": "当前轮次",
+          "type": "integer",
+          "example": 1
+        },
+        "current_seed_id": {
+          "description": "当前种子ID",
+          "type": "integer",
+          "example": 1
+        },
+        "fertilizer_amount": {
+          "description": "肥料数量",
+          "type": "integer",
+          "example": 100
+        },
+        "growth": {
+          "description": "当前等级成长值",
+          "type": "integer",
+          "example": 500
+        },
+        "is_harvested": {
+          "description": "是否已收获",
+          "type": "boolean",
+          "example": false
+        },
+        "level": {
+          "description": "果树等级",
+          "type": "integer",
+          "example": 5
+        },
+        "max_daily_fertilize_count": {
+          "description": "每天最大施肥次数",
+          "type": "integer",
+          "example": 200
+        },
+        "total_growth": {
+          "description": "总成长值",
+          "type": "integer",
+          "example": 2000
+        }
+      }
+    },
+    "admin.UserIdentityInfo": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "description": "绑定时间",
+          "type": "string",
+          "example": "2024-01-01 12:00:00"
+        },
+        "identity_type": {
+          "description": "身份类型",
+          "type": "string",
+          "example": "wechat"
+        },
+        "open_id": {
+          "description": "OpenID（脱敏）",
+          "type": "string",
+          "example": "oXxx...xxx"
+        },
+        "union_id": {
+          "description": "UnionID（脱敏）",
+          "type": "string",
+          "example": "oXxx...xxx"
+        }
+      }
+    },
+    "admin.UserListResponse": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "description": "用户列表"
+        },
+        "page": {
+          "description": "当前页",
+          "type": "integer",
+          "example": 1
+        },
+        "page_size": {
+          "description": "每页数量",
+          "type": "integer",
+          "example": 10
+        },
+        "total": {
+          "description": "总数",
+          "type": "integer",
+          "example": 100
+        }
+      }
+    },
+    "models.AddressSnapshot": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "description": "市",
+          "type": "string"
+        },
+        "detail": {
+          "description": "详细地址",
+          "type": "string"
+        },
+        "district": {
+          "description": "区",
+          "type": "string"
+        },
+        "name": {
+          "description": "收货人姓名",
+          "type": "string"
+        },
+        "phone": {
+          "description": "手机号",
+          "type": "string"
+        },
+        "province": {
+          "description": "省",
+          "type": "string"
+        }
+      }
+    },
+    "models.Admin": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "role": {
+          "description": "角色：super_admin, admin, operator",
+          "type": "string"
+        },
+        "status": {
+          "description": "0正常 1禁用",
+          "type": "integer"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "username": {
+          "description": "管理员账号",
+          "type": "string"
+        }
+      }
+    },
+    "models.SeedConfig": {
+      "type": "object",
+      "properties": {
+        "coupon_id": {
+          "description": "优惠券ID（优惠券类型时使用）",
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "icon_url": {
+          "description": "种子图标URL",
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "description": "种子名称（如：突尼斯石榴）",
+          "type": "string"
+        },
+        "reward_type": {
+          "description": "奖励类型：coupon",
+          "type": "string"
+        },
+        "shop_sku_id": {
+          "description": "微信小店SKU ID（商品类型时使用）",
+          "type": "string"
+        },
+        "sort_order": {
+          "description": "排序顺序（数字越小越靠前）",
+          "type": "integer"
+        },
+        "status": {
+          "description": "状态：0启用 1禁用",
+          "type": "integer"
+        },
+        "updated_at": {
+          "type": "string"
+        }
+      }
+    },
+    "models.SeedSnapshot": {
+      "type": "object",
+      "properties": {
+        "coupon_id": {
+          "description": "优惠券ID",
+          "type": "string"
+        },
+        "icon_url": {
+          "description": "种子图标URL",
+          "type": "string"
+        },
+        "name": {
+          "description": "种子名称",
+          "type": "string"
+        },
+        "reward_type": {
+          "description": "奖励类型",
+          "type": "string"
+        },
+        "shop_sku_id": {
+          "description": "微信小店SKU ID",
+          "type": "string"
+        }
+      }
+    },
+    "models.TaskConfig": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string"
+        },
+        "description": {
+          "description": "任务描述",
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "is_enabled": {
+          "description": "是否启用",
+          "type": "boolean"
+        },
+        "is_one_time": {
+          "description": "是否为一次性任务（不随每天刷新）",
+          "type": "boolean"
+        },
+        "max_count": {
+          "description": "每日最大完成次数（一次性任务此字段无效）",
+          "type": "integer"
+        },
+        "need_claim": {
+          "description": "是否需要主动领取奖励（false=完成即发放，true=需要调用领取接口）",
+          "type": "boolean"
+        },
+        "reward": {
+          "description": "单次奖励（肥料数量）",
+          "type": "integer"
+        },
+        "sort_order": {
+          "description": "排序",
+          "type": "integer"
+        },
+        "task_name": {
+          "description": "任务名称",
+          "type": "string"
+        },
+        "task_type": {
+          "description": "任务类型",
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        }
+      }
+    },
+    "models.User": {
+      "type": "object",
+      "properties": {
+        "avatar_url": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "last_login_at": {
+          "description": "最后登录时间",
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "status": {
+          "description": "0正常 1禁用",
+          "type": "integer"
+        },
+        "updated_at": {
+          "type": "string"
+        }
+      }
+    },
+    "response.ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 1001
+        },
+        "message": {
+          "type": "string",
+          "example": "操作失败"
+        }
+      }
+    },
+    "response.Response": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer"
+        },
+        "data": {},
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "CookieAuth": {
+      "description": "Session/Cookie 认证，登录后自动携带",
+      "type": "apiKey",
+      "name": "session",
+      "in": "cookie"
+    }
+  }
+}

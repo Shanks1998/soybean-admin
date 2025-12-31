@@ -20,8 +20,8 @@ interface FormModel {
 }
 
 const model: FormModel = reactive({
-  userName: 'Soybean',
-  password: '123456'
+  userName: 'superadmin',
+  password: 'wmTTnUZT4B1251aJFKxoQ6R1Zrrb9o6d'
 });
 
 const rules = computed<Record<keyof FormModel, App.Global.FormRule[]>>(() => {
@@ -36,7 +36,7 @@ const rules = computed<Record<keyof FormModel, App.Global.FormRule[]>>(() => {
 
 async function handleSubmit() {
   await validate();
-  await authStore.login(model.userName, model.password);
+  await authStore.adminLogin(model.userName, model.password);
 }
 
 type AccountKey = 'super' | 'admin' | 'user';
@@ -51,9 +51,9 @@ interface Account {
 const accounts = computed<Account[]>(() => [
   {
     key: 'super',
-    label: $t('page.login.pwdLogin.superAdmin'),
-    userName: 'Super',
-    password: '123456'
+    label: 'Super Admin (真实账号)',
+    userName: 'superadmin',
+    password: 'wmTTnUZT4B1251aJFKxoQ6R1Zrrb9o6d'
   },
   {
     key: 'admin',
@@ -70,7 +70,7 @@ const accounts = computed<Account[]>(() => [
 ]);
 
 async function handleAccountLogin(account: Account) {
-  await authStore.login(account.userName, account.password);
+  await authStore.adminLogin(account.userName, account.password);
 }
 </script>
 

@@ -640,6 +640,16 @@ declare namespace App {
       data: T;
     };
 
+    /** The admin backend service response data */
+    type AdminResponse<T = unknown> = {
+      /** The backend service response code */
+      code: number;
+      /** The backend service response message */
+      message: string;
+      /** The backend service response data */
+      data: T;
+    };
+
     /** The demo backend service response data */
     type DemoResponse<T = unknown> = {
       /** The backend service response code */

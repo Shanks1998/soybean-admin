@@ -21,6 +21,7 @@ export function createViteProxy(env: Env.ImportMeta, enable: boolean) {
   const proxy: Record<string, ProxyOptions> = createProxyItem({ baseURL, proxyPattern }, isEnableProxyLog);
 
   other.forEach(item => {
+    consola.info(`[Vite Proxy] Adding proxy: ${item.proxyPattern} -> ${item.baseURL}`);
     Object.assign(proxy, createProxyItem(item, isEnableProxyLog));
   });
 
@@ -48,7 +49,9 @@ function createProxyItem(item: App.Service.ServiceConfigItem, enableLog: boolean
         consola.log(bgRed(`Error: ${req.method} `), green(`${options.target}${req.url}`));
       });
     },
-    rewrite: path => path.replace(new RegExp(`^${item.proxyPattern}`), '')
+    // Don't rewrite for admin API - keep the full path including /admin/api
+    rewrite:
+      item.proxyPattern === '/admin/api' ? undefined : path => path.replace(new RegExp(`^${item.proxyPattern}`), '')
   };
 
   return proxy;

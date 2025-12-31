@@ -6,7 +6,7 @@ import json5 from 'json5';
  * @param env The current env
  */
 export function createServiceConfig(env: Env.ImportMeta) {
-  const { VITE_SERVICE_BASE_URL, VITE_OTHER_SERVICE_BASE_URL } = env;
+  const { VITE_SERVICE_BASE_URL, VITE_OTHER_SERVICE_BASE_URL, VITE_ADMIN_API_URL } = env;
 
   let other = {} as Record<App.Service.OtherBaseURLKey, string>;
   try {
@@ -30,6 +30,20 @@ export function createServiceConfig(env: Env.ImportMeta) {
       proxyPattern: createProxyPattern(key)
     };
   });
+
+  // Add admin API to other services
+  if (VITE_ADMIN_API_URL) {
+    console.log('🔧 [Admin API Proxy] Configuring admin API proxy...');
+    console.log('  - Pattern: /admin/api');
+    console.log('  - Target:', VITE_ADMIN_API_URL);
+    otherConfig.push({
+      key: 'admin' as App.Service.OtherBaseURLKey,
+      baseURL: VITE_ADMIN_API_URL,
+      proxyPattern: '/admin/api'
+    });
+  } else {
+    console.warn('⚠️ VITE_ADMIN_API_URL is not set!');
+  }
 
   const config: App.Service.ServiceConfig = {
     baseURL: httpConfig.baseURL,

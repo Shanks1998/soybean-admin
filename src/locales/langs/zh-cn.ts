@@ -224,7 +224,13 @@ const local: App.I18n.Schema = {
     404: '页面不存在',
     500: '服务器错误',
     'iframe-page': '外链页面',
-    home: '首页'
+    home: '首页',
+    management: '后台管理',
+    management_harvest: '收获管理',
+    management_order: '订单管理',
+    management_seed: '种子管理',
+    management_task: '任务管理',
+    management_user: '用户管理'
   },
   page: {
     login: {

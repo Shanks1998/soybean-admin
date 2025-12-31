@@ -2,7 +2,8 @@ import { computed, reactive, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { defineStore } from 'pinia';
 import { useLoading } from '@sa/hooks';
-import { fetchGetUserInfo, fetchLogin } from '@/service/api';
+import { ADMIN_PERMISSIONS } from '@/constants/business';
+import { fetchAdminLogin, fetchAdminProfile, fetchGetUserInfo, fetchLogin } from '@/service/api';
 import { useRouterPush } from '@/hooks/common/router';
 import { localStg } from '@/utils/storage';
 import { SetupStoreId } from '@/enum';
@@ -21,11 +22,25 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
 
   const token = ref(getToken());
 
+  /** User type: admin or regular */
+  const userType = ref<Api.Auth.UserType | null>(null);
+
+  /** Regular user info */
   const userInfo: Api.Auth.UserInfo = reactive({
     userId: '',
     userName: '',
     roles: [],
     buttons: []
+  });
+
+  /** Admin user info */
+  const adminInfo: Api.Auth.AdminInfo = reactive({
+    id: 0,
+    username: '',
+    role: 'operator',
+    status: 0,
+    created_at: '',
+    updated_at: ''
   });
 
   /** is super role in static route */
@@ -35,14 +50,54 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
     return VITE_AUTH_ROUTE_MODE === 'static' && userInfo.roles.includes(VITE_STATIC_SUPER_ROLE);
   });
 
-  /** Is login */
-  const isLogin = computed(() => Boolean(token.value));
+  /** Is login - supports both admin and regular users */
+  const isLogin = computed(() => {
+    if (userType.value === 'admin') {
+      return Boolean(adminInfo && adminInfo.id);
+    }
+    return Boolean(token.value);
+  });
+
+  /** Admin role */
+  const role = computed(() => {
+    if (userType.value === 'admin') {
+      return adminInfo?.role || 'operator';
+    }
+    return userInfo.roles[0] || '';
+  });
+
+  /** Is super admin */
+  const isSuperAdmin = computed(() => adminInfo?.role === 'super_admin');
+
+  /** Is admin */
+  const isAdmin = computed(() => adminInfo?.role === 'admin');
+
+  /** Is operator */
+  const isOperator = computed(() => adminInfo?.role === 'operator');
 
   /** Reset auth store */
   async function resetStore() {
-    recordUserId();
+    // Record user ID only for regular users
+    if (userType.value === 'regular') {
+      recordUserId();
+    }
 
     clearAuthStorage();
+
+    // Reset admin info
+    if (adminInfo) {
+      Object.assign(adminInfo, {
+        id: 0,
+        username: '',
+        role: 'operator',
+        status: 0,
+        created_at: '',
+        updated_at: ''
+      });
+    }
+
+    // Reset user type
+    userType.value = null;
 
     authStore.$reset();
 
@@ -170,7 +225,97 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
     }
   }
 
+  /**
+   * Admin login
+   *
+   * @param username Admin username
+   * @param password Admin password
+   * @param [redirect=true] Whether to redirect after login
+   */
+  async function adminLogin(username: string, password: string, redirect = true) {
+    startLoading();
+
+    try {
+      const { data, error } = await fetchAdminLogin(username, password);
+
+      if (!error && data) {
+        const pass = await getAdminProfile();
+
+        if (pass) {
+          userType.value = 'admin';
+
+          if (redirect) {
+            await redirectFromLogin();
+          }
+
+          const loginData = data as unknown as App.Service.AdminResponse<Api.Admin.Auth.LoginResponse>;
+          window.$notification?.success({
+            title: $t('page.login.common.loginSuccess'),
+            content: $t('page.login.common.welcomeBack', { userName: loginData.data.username }),
+            duration: 4500
+          });
+
+          return true;
+        }
+      }
+
+      return false;
+    } finally {
+      endLoading();
+    }
+  }
+
+  /**
+   * Get admin profile
+   */
+  async function getAdminProfile() {
+    const { data, error } = await fetchAdminProfile();
+
+    // TypeScript doesn't know that data contains a nested data field
+    // So we use type assertion to access it
+    const responseData = data as unknown as App.Service.AdminResponse<Api.Auth.AdminInfo>;
+
+    if (!error && responseData && responseData.data && adminInfo) {
+      Object.assign(adminInfo, responseData.data);
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if admin has permission
+   *
+   * @param module Module name
+   * @param action Action name
+   */
+  function hasPermission(module: keyof typeof ADMIN_PERMISSIONS, action: string): boolean {
+    if (userType.value !== 'admin' || !role.value) return false;
+
+    const permissions = ADMIN_PERMISSIONS[module];
+    if (!permissions) return false;
+
+    const allowedRoles = permissions[action as keyof typeof permissions];
+    if (!allowedRoles) return false;
+
+    return (allowedRoles as readonly string[]).includes(role.value);
+  }
+
+  /**
+   * Init admin info (check login status on app init)
+   */
+  async function initAdminInfo() {
+    const pass = await getAdminProfile();
+
+    if (pass) {
+      userType.value = 'admin';
+    } else {
+      await resetStore();
+    }
+  }
+
   return {
+    // Existing exports (regular user)
     token,
     userInfo,
     isStaticSuper,
@@ -178,6 +323,18 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
     loginLoading,
     resetStore,
     login,
-    initUserInfo
+    initUserInfo,
+
+    // New exports (admin user)
+    userType,
+    adminInfo,
+    role,
+    isSuperAdmin,
+    isAdmin,
+    isOperator,
+    adminLogin,
+    getAdminProfile,
+    hasPermission,
+    initAdminInfo
   };
 });

@@ -1,6 +1,6 @@
 /** * Harvest Record Management Page * 收获记录管理页面 */
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onActivated, ref } from 'vue';
 import { NCard, NSpace } from 'naive-ui';
 import { fetchHarvestList } from '@/service/api';
 import HarvestSearch from './modules/harvest-search.vue';
@@ -116,6 +116,14 @@ function handleUpdateTracking(record: Api.Admin.Harvest.HarvestRecord) {
 function handleModalSuccess() {
   fetchData();
 }
+
+/**
+ * Handle component activated (when restored from keep-alive cache)
+ */
+onActivated(() => {
+  // Refresh data when component is activated from cache
+  fetchData();
+});
 
 // Initial fetch
 fetchData();

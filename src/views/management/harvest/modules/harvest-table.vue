@@ -47,13 +47,13 @@ const columns: DataTableColumns<Api.Admin.Harvest.HarvestRecord> = [
     ellipsis: {
       tooltip: true
     },
-    render: row => row.address_data.name
+    render: row => row.address_data?.name || '-'
   },
   {
     title: '联系电话',
     key: 'recipient_phone',
     width: 130,
-    render: row => row.address_data.phone
+    render: row => row.address_data?.phone || '-'
   },
   {
     title: '收获地址',
@@ -64,7 +64,8 @@ const columns: DataTableColumns<Api.Admin.Harvest.HarvestRecord> = [
     },
     render: row => {
       const addr = row.address_data;
-      return `${addr.province} ${addr.city} ${addr.district} ${addr.detail}`;
+      if (!addr) return '-';
+      return `${addr.province || ''} ${addr.city || ''} ${addr.district || ''} ${addr.detail || ''}`;
     }
   },
   {
@@ -74,6 +75,7 @@ const columns: DataTableColumns<Api.Admin.Harvest.HarvestRecord> = [
     align: 'center',
     render: row => {
       const statusConfig = HARVEST_STATUS_MAP[row.status];
+      if (!statusConfig) return '-';
       return h(
         NTag,
         {

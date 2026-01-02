@@ -248,10 +248,11 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
             await redirectFromLogin();
           }
 
-          const loginData = data as unknown as App.Service.AdminResponse<Api.Admin.Auth.LoginResponse>;
+          // Transform has unwrapped the response, data is now the direct login response
+          const loginData = data as Api.Admin.Auth.LoginResponse;
           window.$notification?.success({
             title: $t('page.login.common.loginSuccess'),
-            content: $t('page.login.common.welcomeBack', { userName: loginData.data.username }),
+            content: $t('page.login.common.welcomeBack', { userName: loginData.username }),
             duration: 4500
           });
 
@@ -271,12 +272,10 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
   async function getAdminProfile() {
     const { data, error } = await fetchAdminProfile();
 
-    // TypeScript doesn't know that data contains a nested data field
-    // So we use type assertion to access it
-    const responseData = data as unknown as App.Service.AdminResponse<Api.Auth.AdminInfo>;
-
-    if (!error && responseData && responseData.data && adminInfo) {
-      Object.assign(adminInfo, responseData.data);
+    // transformBackendResponse has already unwrapped the response
+    // data is now directly the admin info object, not wrapped in { code, message, data }
+    if (!error && data && adminInfo) {
+      Object.assign(adminInfo, data);
       return true;
     }
 

@@ -1,6 +1,6 @@
 /** * Seed Management Page * 种子管理页面 */
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onActivated, ref } from 'vue';
 import { NButton, NCard, NSpace } from 'naive-ui';
 import { deleteSeed, fetchSeedList } from '@/service/api';
 import SeedSearch from './modules/seed-search.vue';
@@ -42,20 +42,50 @@ const selectedSeed = ref<Api.Admin.Seed.SeedConfig | null>(null);
 async function fetchData() {
   loading.value = true;
   try {
+    console.log('📋 [Seed List] ===== 开始获取种子列表 =====');
+    console.log('🔹 当前页码:', pagination.value.page);
+    console.log('🔹 每页数量:', pagination.value.pageSize);
+    console.log('🔹 搜索参数:', searchParams.value);
+
     const { data } = await fetchSeedList({
       page: pagination.value.page,
       page_size: pagination.value.pageSize,
       ...searchParams.value
     });
 
+    console.log('📦 [Seed List] ===== 收到数据 =====');
+    console.log('🔹 完整返回对象:', { data });
+    console.log('🔹 data 类型:', typeof data);
+    console.log('🔹 data 是否为 null:', data === null);
+
     if (data) {
+      console.log('🔹 data 的所有键:', Object.keys(data));
+      console.log('🔹 data.code:', (data as any).code);
+      console.log('🔹 data.message:', (data as any).message);
+      console.log('🔹 data.data:', (data as any).data);
+      console.log('🔹 直接访问 data.list:', data.list);
+      console.log('🔹 直接访问 data.total:', data.total);
+      console.log('🔹 嵌套访问 data.data?.list:', (data as any).data?.list);
+      console.log('🔹 嵌套访问 data.data?.total:', (data as any).data?.total);
+
+      console.log('🔹 完整 data 对象:', JSON.stringify(data, null, 2));
+
       seedList.value = data.list;
       pagination.value.total = data.total;
+
+      console.log('✅ [Seed List] 数据已更新');
+      console.log('🔹 seedList.value 长度:', seedList.value?.length);
+      console.log('🔹 pagination.total:', pagination.value.total);
+    } else {
+      console.warn('⚠️ [Seed List] data 为空或 null');
     }
   } catch (error) {
+    console.error('❌ [Seed List] 获取失败');
+    console.error('🔹 错误对象:', error);
     console.error('Failed to fetch seed list:', error);
   } finally {
     loading.value = false;
+    console.log('🏁 [Seed List] 请求完成，loading = false');
   }
 }
 
@@ -148,6 +178,14 @@ async function handleSortChange(list: Api.Admin.Seed.SeedConfig[]) {
 function handleModalSuccess() {
   fetchData();
 }
+
+/**
+ * Handle component activated (when restored from keep-alive cache)
+ */
+onActivated(() => {
+  // Refresh data when component is activated from cache
+  fetchData();
+});
 
 // Initial fetch
 fetchData();

@@ -101,8 +101,7 @@ async function handleSubmit() {
 
     emit('success');
     handleClose();
-  } catch (error) {
-    console.error('Failed to save seed:', error);
+  } catch {
   } finally {
     submitting.value = false;
   }
@@ -168,7 +167,7 @@ watch(
 </script>
 
 <template>
-  <NModal :show="visible" preset="card" :title="modalTitle" :style="{ width: '600px' }" @update:show="handleClose">
+  <NModal :show="visible" preset="card" :title="modalTitle" class="w-600px" @update:show="handleClose">
     <NForm ref="formRef" :model="formModel" :rules="rules" label-placement="left" label-width="120">
       <NFormItem label="种子名称" path="name">
         <NInput v-model:value="formModel.name" placeholder="请输入种子名称，如：突尼斯石榴" maxlength="64" show-count />

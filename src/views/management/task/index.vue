@@ -48,8 +48,7 @@ async function fetchData() {
       taskList.value = data.list;
       pagination.value.total = data.total;
     }
-  } catch (error) {
-    console.error('Failed to fetch task list:', error);
+  } catch {
   } finally {
     loading.value = false;
   }
@@ -103,22 +102,23 @@ function handleEdit(record: Api.Admin.Task.TaskConfig) {
  * Handle delete task
  */
 async function handleDelete(id: number) {
-  const confirmed = await window.$dialog?.warning({
+  window.$dialog?.warning({
     title: '确认删除',
     content: '确定要删除该任务吗？删除后将无法恢复！',
     positiveText: '确定',
-    negativeText: '取消'
+    negativeText: '取消',
+    onPositiveClick: async () => {
+      try {
+        const { error } = await deleteTask(id);
+        if (!error) {
+          window.$message?.success('删除成功');
+          fetchData();
+        }
+      } catch {
+        // Error is handled by request interceptor
+      }
+    }
   });
-
-  if (!confirmed) return;
-
-  try {
-    await deleteTask(id);
-    window.$message?.success('删除成功');
-    fetchData();
-  } catch (error) {
-    console.error('Failed to delete task:', error);
-  }
 }
 
 /**

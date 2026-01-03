@@ -17,11 +17,11 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'page-change', page: number): void;
-  (e: 'page-size-change', pageSize: number): void;
+  (e: 'pageChange', page: number): void;
+  (e: 'pageSizeChange', pageSize: number): void;
   (e: 'view', record: Api.Admin.Harvest.HarvestRecord): void;
-  (e: 'update-status', record: Api.Admin.Harvest.HarvestRecord): void;
-  (e: 'update-tracking', record: Api.Admin.Harvest.HarvestRecord): void;
+  (e: 'updateStatus', record: Api.Admin.Harvest.HarvestRecord): void;
+  (e: 'updateTracking', record: Api.Admin.Harvest.HarvestRecord): void;
 }
 
 defineProps<Props>();
@@ -121,7 +121,7 @@ const columns: DataTableColumns<Api.Admin.Harvest.HarvestRecord> = [
           {
             size: 'small',
             type: 'primary',
-            onClick: () => emit('update-status', row)
+            onClick: () => emit('updateStatus', row)
           },
           () => '状态'
         ),
@@ -130,7 +130,7 @@ const columns: DataTableColumns<Api.Admin.Harvest.HarvestRecord> = [
           {
             size: 'small',
             type: 'info',
-            onClick: () => emit('update-tracking', row)
+            onClick: () => emit('updateTracking', row)
           },
           () => '单号'
         )
@@ -140,11 +140,11 @@ const columns: DataTableColumns<Api.Admin.Harvest.HarvestRecord> = [
 ];
 
 function handlePageChange(page: number) {
-  emit('page-change', page);
+  emit('pageChange', page);
 }
 
 function handlePageSizeChange(pageSize: number) {
-  emit('page-size-change', pageSize);
+  emit('pageSizeChange', pageSize);
 }
 </script>
 

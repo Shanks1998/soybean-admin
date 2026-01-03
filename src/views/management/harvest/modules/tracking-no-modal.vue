@@ -46,8 +46,7 @@ async function handleSubmit() {
     window.$message?.success('快递单号更新成功');
     emit('success');
     handleClose();
-  } catch (error) {
-    console.error('Failed to update tracking number:', error);
+  } catch {
   } finally {
     submitting.value = false;
   }
@@ -74,7 +73,7 @@ watch(
 </script>
 
 <template>
-  <NModal :show="visible" preset="card" title="更新快递单号" :style="{ width: '500px' }" @update:show="handleClose">
+  <NModal :show="visible" preset="card" title="更新快递单号" class="w-500px" @update:show="handleClose">
     <NForm ref="formRef" :model="formModel" :rules="rules" label-placement="left" label-width="120">
       <NFormItem label="快递单号" path="tracking_no">
         <NInput

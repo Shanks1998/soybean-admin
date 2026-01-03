@@ -103,8 +103,7 @@ async function handleSubmit() {
 
     emit('success');
     handleClose();
-  } catch (error) {
-    console.error('Failed to save task:', error);
+  } catch {
   } finally {
     submitting.value = false;
   }
@@ -163,7 +162,7 @@ watch(
 </script>
 
 <template>
-  <NModal :show="visible" preset="card" :title="modalTitle" :style="{ width: '600px' }" @update:show="handleClose">
+  <NModal :show="visible" preset="card" :title="modalTitle" class="w-600px" @update:show="handleClose">
     <NForm ref="formRef" :model="formModel" :rules="rules" label-placement="left" label-width="140">
       <NFormItem label="任务名称" path="task_name">
         <NInput

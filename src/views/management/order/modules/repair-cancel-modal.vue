@@ -78,7 +78,7 @@ function handleClose() {
 </script>
 
 <template>
-  <NModal :show="visible" preset="card" title="补单取消" :style="{ width: '600px' }" @update:show="handleClose">
+  <NModal :show="visible" preset="card" title="补单取消" class="w-600px" @update:show="handleClose">
     <NAlert type="error" title="操作风险提示" :bordered="false" class="mb-4">
       此操作将强制触发订单取消的业务逻辑，包括：
       <ul class="mt-2">

@@ -16,8 +16,8 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'page-change', page: number): void;
-  (e: 'page-size-change', pageSize: number): void;
+  (e: 'pageChange', page: number): void;
+  (e: 'pageSizeChange', pageSize: number): void;
   (e: 'edit', record: Api.Admin.Task.TaskConfig): void;
   (e: 'delete', id: number): void;
 }
@@ -157,11 +157,11 @@ const columns: DataTableColumns<Api.Admin.Task.TaskConfig> = [
 ];
 
 function handlePageChange(page: number) {
-  emit('page-change', page);
+  emit('pageChange', page);
 }
 
 function handlePageSizeChange(pageSize: number) {
-  emit('page-size-change', pageSize);
+  emit('pageSizeChange', pageSize);
 }
 </script>
 

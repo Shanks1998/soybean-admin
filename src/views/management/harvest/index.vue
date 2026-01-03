@@ -53,8 +53,7 @@ async function fetchData() {
       harvestList.value = data.records;
       pagination.value.total = data.total;
     }
-  } catch (error) {
-    console.error('Failed to fetch harvest list:', error);
+  } catch {
   } finally {
     loading.value = false;
   }

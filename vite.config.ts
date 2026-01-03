@@ -39,13 +39,8 @@ export default defineConfig(configEnv => {
           changeOrigin: true,
           // explicitly return path as-is
           rewrite: path => path,
-          configure: (proxy, options) => {
-            proxy.on('proxyReq', (_proxyReq, req, _res) => {
-              console.log('⚡ [Hardcoded Proxy] Request:', req.url);
-              if (options.target && req.url) {
-                console.log('   -> Target:', options.target + req.url);
-              }
-            });
+          configure: (proxy, _options) => {
+            proxy.on('proxyReq', (_proxyReq, _req, _res) => {});
           }
         }
       }

@@ -17,12 +17,12 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'page-change', page: number): void;
-  (e: 'page-size-change', pageSize: number): void;
+  (e: 'pageChange', page: number): void;
+  (e: 'pageSizeChange', pageSize: number): void;
   (e: 'view', id: number): void;
-  (e: 'update-status', id: number): void;
-  (e: 'adjust-fertilizer', id: number): void;
-  (e: 'update-fertilize-count', id: number): void;
+  (e: 'updateStatus', id: number): void;
+  (e: 'adjustFertilizer', id: number): void;
+  (e: 'updateFertilizeCount', id: number): void;
   (e: 'delete', id: number): void;
 }
 
@@ -107,7 +107,7 @@ const columns: DataTableColumns<Api.Admin.User.UserInfo> = [
           {
             size: 'small',
             type: 'primary',
-            onClick: () => emit('update-status', row.id)
+            onClick: () => emit('updateStatus', row.id)
           },
           () => '状态'
         ),
@@ -116,7 +116,7 @@ const columns: DataTableColumns<Api.Admin.User.UserInfo> = [
           {
             size: 'small',
             type: 'info',
-            onClick: () => emit('adjust-fertilizer', row.id)
+            onClick: () => emit('adjustFertilizer', row.id)
           },
           () => '肥料'
         ),
@@ -125,7 +125,7 @@ const columns: DataTableColumns<Api.Admin.User.UserInfo> = [
           {
             size: 'small',
             type: 'warning',
-            onClick: () => emit('update-fertilize-count', row.id)
+            onClick: () => emit('updateFertilizeCount', row.id)
           },
           () => '次数'
         ),
@@ -144,11 +144,11 @@ const columns: DataTableColumns<Api.Admin.User.UserInfo> = [
 ];
 
 function handlePageChange(page: number) {
-  emit('page-change', page);
+  emit('pageChange', page);
 }
 
 function handlePageSizeChange(pageSize: number) {
-  emit('page-size-change', pageSize);
+  emit('pageSizeChange', pageSize);
 }
 </script>
 

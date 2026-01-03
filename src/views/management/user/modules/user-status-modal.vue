@@ -34,8 +34,7 @@ async function fetchData() {
     if (data) {
       formModel.value.status = data.user.status;
     }
-  } catch (error) {
-    console.error('Failed to fetch user:', error);
+  } catch {
   } finally {
     loading.value = false;
   }
@@ -54,8 +53,7 @@ async function handleSubmit() {
     window.$message?.success('状态更新成功');
     emit('success');
     handleClose();
-  } catch (error) {
-    console.error('Failed to update status:', error);
+  } catch {
   } finally {
     submitting.value = false;
   }
@@ -80,7 +78,7 @@ watch(
 </script>
 
 <template>
-  <NModal :show="visible" preset="card" title="更新用户状态" :style="{ width: '500px' }" @update:show="handleClose">
+  <NModal :show="visible" preset="card" title="更新用户状态" class="w-500px" @update:show="handleClose">
     <NSpin :show="loading">
       <NForm :model="formModel" label-placement="left" label-width="120">
         <NFormItem label="用户状态">

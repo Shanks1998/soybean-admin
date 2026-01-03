@@ -31,8 +31,7 @@ async function fetchData() {
     if (data) {
       userDetail.value = data;
     }
-  } catch (error) {
-    console.error('Failed to fetch user detail:', error);
+  } catch {
   } finally {
     loading.value = false;
   }
@@ -59,7 +58,7 @@ watch(
 </script>
 
 <template>
-  <NModal :show="visible" preset="card" title="用户详情" :style="{ width: '800px' }" @update:show="handleClose">
+  <NModal :show="visible" preset="card" title="用户详情" class="w-800px" @update:show="handleClose">
     <NSpin :show="loading">
       <div v-if="userDetail" class="user-detail">
         <!-- Basic Info -->

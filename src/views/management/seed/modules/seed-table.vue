@@ -18,12 +18,10 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'page-change', page: number): void;
-  (e: 'page-size-change', pageSize: number): void;
+  (e: 'pageChange', page: number): void;
+  (e: 'pageSizeChange', pageSize: number): void;
   (e: 'edit', record: Api.Admin.Seed.SeedConfig): void;
-  (e: 'update-status', record: Api.Admin.Seed.SeedConfig): void;
   (e: 'delete', id: number): void;
-  (e: 'sort-change', list: Api.Admin.Seed.SeedConfig[]): void;
 }
 
 defineProps<Props>();
@@ -39,8 +37,7 @@ async function handleStatusChange(row: Api.Admin.Seed.SeedConfig, value: boolean
     await updateSeedStatus(row.id, { status: newStatus });
     window.$message?.success('状态更新成功');
     row.status = newStatus;
-  } catch (error) {
-    console.error('Failed to update status:', error);
+  } catch {
     // Revert the change on error
     row.status = value ? SEED_STATUS.DISABLED : SEED_STATUS.ENABLED;
   }
@@ -157,11 +154,11 @@ const columns: DataTableColumns<Api.Admin.Seed.SeedConfig> = [
 ];
 
 function handlePageChange(page: number) {
-  emit('page-change', page);
+  emit('pageChange', page);
 }
 
 function handlePageSizeChange(pageSize: number) {
-  emit('page-size-change', pageSize);
+  emit('pageSizeChange', pageSize);
 }
 </script>
 

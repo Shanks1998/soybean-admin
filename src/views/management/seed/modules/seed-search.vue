@@ -54,7 +54,7 @@ function handleReset() {
         :options="statusOptions"
         placeholder="请选择状态"
         clearable
-        style="width: 120px"
+        class="w-120px"
       />
     </NFormItem>
 

@@ -52,8 +52,7 @@ async function fetchData() {
     if (data) {
       formModel.value.max_daily_fertilize_count = data.game_state.max_daily_fertilize_count;
     }
-  } catch (error) {
-    console.error('Failed to fetch user:', error);
+  } catch {
   } finally {
     loading.value = false;
   }
@@ -74,8 +73,7 @@ async function handleSubmit() {
     window.$message?.success('施肥次数更新成功');
     emit('success');
     handleClose();
-  } catch (error) {
-    console.error('Failed to update fertilize count:', error);
+  } catch {
   } finally {
     submitting.value = false;
   }
@@ -101,13 +99,7 @@ watch(
 </script>
 
 <template>
-  <NModal
-    :show="visible"
-    preset="card"
-    title="更新每日最大施肥次数"
-    :style="{ width: '500px' }"
-    @update:show="handleClose"
-  >
+  <NModal :show="visible" preset="card" title="更新每日最大施肥次数" class="w-500px" @update:show="handleClose">
     <NSpin :show="loading">
       <NForm ref="formRef" :model="formModel" :rules="rules" label-placement="left" label-width="160">
         <NFormItem label="每日最大施肥次数" path="max_daily_fertilize_count">

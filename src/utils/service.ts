@@ -33,16 +33,11 @@ export function createServiceConfig(env: Env.ImportMeta) {
 
   // Add admin API to other services
   if (VITE_ADMIN_API_URL) {
-    console.log('🔧 [Admin API Proxy] Configuring admin API proxy...');
-    console.log('  - Pattern: /admin/api');
-    console.log('  - Target:', VITE_ADMIN_API_URL);
     otherConfig.push({
       key: 'admin' as App.Service.OtherBaseURLKey,
       baseURL: VITE_ADMIN_API_URL,
       proxyPattern: '/admin/api'
     });
-  } else {
-    console.warn('⚠️ VITE_ADMIN_API_URL is not set!');
   }
 
   const config: App.Service.ServiceConfig = {

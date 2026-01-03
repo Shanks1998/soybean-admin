@@ -52,8 +52,7 @@ async function handleSubmit() {
     window.$message?.success('肥料调整成功');
     emit('success');
     handleClose();
-  } catch (error) {
-    console.error('Failed to adjust fertilizer:', error);
+  } catch {
   } finally {
     submitting.value = false;
   }
@@ -83,7 +82,7 @@ watch(
 </script>
 
 <template>
-  <NModal :show="visible" preset="card" title="调整肥料" :style="{ width: '500px' }" @update:show="handleClose">
+  <NModal :show="visible" preset="card" title="调整肥料" class="w-500px" @update:show="handleClose">
     <NForm ref="formRef" :model="formModel" :rules="rules" label-placement="left" label-width="120">
       <NFormItem label="调整数量" path="amount">
         <NInputNumber

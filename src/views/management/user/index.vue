@@ -1,8 +1,8 @@
 /** * User Management Page * 用户管理页面 */
 <script setup lang="ts">
 import { ref } from 'vue';
-import { NCard, NSpace } from 'naive-ui';
-import { fetchUserList } from '@/service/api';
+import { NButton, NCard, NInput, NSpace } from 'naive-ui';
+import { deleteUser, fetchUserList } from '@/service/api';
 import UserSearch from './modules/user-search.vue';
 import UserTable from './modules/user-table.vue';
 import UserDetailModal from './modules/user-detail-modal.vue';
@@ -30,6 +30,44 @@ const pagination = ref({
 // Search params
 const searchParams = ref({});
 
+// Delete by ID
+const deleteInputId = ref<string>('');
+
+/**
+ * Handle delete by input ID
+ */
+async function handleDeleteById() {
+  if (!deleteInputId.value) {
+    window.$message?.warning('请输入用户ID');
+    return;
+  }
+
+  const id = Number(deleteInputId.value);
+  if (Number.isNaN(id)) {
+    window.$message?.warning('请输入有效的数字ID');
+    return;
+  }
+
+  window.$dialog?.warning({
+    title: '确认删除',
+    content: `确定要删除用户 ID: ${id} 吗？此操作不可恢复！`,
+    positiveText: '确定',
+    negativeText: '取消',
+    onPositiveClick: async () => {
+      try {
+        const { error } = await deleteUser(id);
+        if (!error) {
+          window.$message?.success('删除成功');
+          deleteInputId.value = '';
+          fetchData();
+        }
+      } catch {
+        // Error is handled by request interceptor
+      }
+    }
+  });
+}
+
 // Modals visibility
 const detailModalVisible = ref(false);
 const statusModalVisible = ref(false);
@@ -55,8 +93,8 @@ async function fetchData() {
       userList.value = data.list;
       pagination.value.total = data.total;
     }
-  } catch (error) {
-    console.error('Failed to fetch user list:', error);
+  } catch {
+    // Error is handled by request interceptor
   } finally {
     loading.value = false;
   }
@@ -123,19 +161,24 @@ function handleUpdateFertilizeCount(id: number) {
 /**
  * Handle delete user
  */
-async function handleDelete(_id: number) {
-  const confirmed = await window.$dialog?.warning({
+async function handleDelete(id: number) {
+  window.$dialog?.warning({
     title: '确认删除',
     content: '确定要删除该用户吗？此操作不可恢复！',
     positiveText: '确定',
-    negativeText: '取消'
+    negativeText: '取消',
+    onPositiveClick: async () => {
+      try {
+        const { error } = await deleteUser(id);
+        if (!error) {
+          window.$message?.success('删除成功');
+          fetchData();
+        }
+      } catch {
+        // Error is handled by request interceptor
+      }
+    }
   });
-
-  if (!confirmed) return;
-
-  // Note: Implement delete API call
-  window.$message?.success('删除成功');
-  fetchData();
 }
 
 /**
@@ -152,6 +195,13 @@ fetchData();
 <template>
   <NSpace vertical :size="16">
     <UserSearch @search="handleSearch" />
+
+    <NCard :bordered="false" title="按ID删除用户">
+      <NSpace align="center">
+        <NInput v-model:value="deleteInputId" placeholder="请输入要删除的用户ID" class="delete-input" clearable />
+        <NButton type="error" @click="handleDeleteById">删除用户</NButton>
+      </NSpace>
+    </NCard>
 
     <NCard :bordered="false" class="card-wrapper">
       <UserTable
@@ -193,5 +243,9 @@ fetchData();
 <style scoped>
 .card-wrapper {
   min-height: 500px;
+}
+
+.delete-input {
+  width: 200px;
 }
 </style>

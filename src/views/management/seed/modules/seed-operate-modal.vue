@@ -1,8 +1,7 @@
 /** * Seed Operate Modal Component (Add/Edit) * 种子新增/编辑弹窗组件 */
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { NButton, NForm, NFormItem, NInput, NInputNumber, NModal, NSelect, NUpload } from 'naive-ui';
-import type { UploadFileInfo } from 'naive-ui';
+import { NButton, NForm, NFormItem, NInput, NInputNumber, NModal, NSelect } from 'naive-ui';
 import { SEED_STATUS } from '@/constants/business';
 import { createSeed, updateSeed } from '@/service/api';
 
@@ -20,7 +19,6 @@ const emit = defineEmits<{
 
 const formRef = ref();
 const submitting = ref(false);
-const uploadFileList = ref<UploadFileInfo[]>([]);
 
 const formModel = ref({
   name: '',
@@ -52,21 +50,6 @@ const rules = {
 const modalTitle = computed(() => {
   return props.type === 'add' ? '新增种子' : '编辑种子';
 });
-
-/**
- * Handle upload change
- */
-function handleUploadChange(options: { fileList: UploadFileInfo[] }) {
-  uploadFileList.value = options.fileList;
-
-  // Get the last uploaded file's URL
-  if (options.fileList.length > 0) {
-    const lastFile = options.fileList[options.fileList.length - 1];
-    if (lastFile.url) {
-      formModel.value.icon_url = lastFile.url;
-    }
-  }
-}
 
 /**
  * Handle submit
@@ -128,7 +111,6 @@ function resetForm() {
     sort_order: 0,
     status: SEED_STATUS.ENABLED
   };
-  uploadFileList.value = [];
 }
 
 // Watch visible and editData change
@@ -146,18 +128,6 @@ watch(
           sort_order: props.editData.sort_order,
           status: props.editData.status
         };
-
-        // Set upload file list for preview
-        if (props.editData.icon_url) {
-          uploadFileList.value = [
-            {
-              id: 'current',
-              name: props.editData.name,
-              status: 'finished',
-              url: props.editData.icon_url
-            }
-          ];
-        }
       } else {
         resetForm();
       }
@@ -174,21 +144,7 @@ watch(
       </NFormItem>
 
       <NFormItem label="种子图标" path="icon_url">
-        <div class="upload-wrapper">
-          <NUpload
-            v-model:file-list="uploadFileList"
-            accept="image/*"
-            :max="1"
-            list-type="image-card"
-            @change="handleUploadChange"
-          >
-            点击上传图标
-          </NUpload>
-          <div v-if="!formModel.icon_url" class="upload-tip">支持jpg、png等图片格式，建议尺寸：256x256px</div>
-          <div v-if="formModel.icon_url" class="url-input-wrapper">
-            <NInput v-model:value="formModel.icon_url" placeholder="或直接输入图片URL" clearable />
-          </div>
-        </div>
+        <NInput v-model:value="formModel.icon_url" placeholder="请输入图片URL" clearable />
       </NFormItem>
 
       <NFormItem label="商品SKU" path="shop_sku_id">
@@ -228,20 +184,6 @@ watch(
 </template>
 
 <style scoped>
-.upload-wrapper {
-  width: 100%;
-}
-
-.upload-tip {
-  color: #a0a0a0;
-  font-size: 0.75rem;
-  margin-top: 8px;
-}
-
-.url-input-wrapper {
-  margin-top: 12px;
-}
-
 .w-full {
   width: 100%;
 }
